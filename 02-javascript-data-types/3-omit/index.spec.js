@@ -18,4 +18,10 @@ describe('javascript-data-types/omit', () => {
 
     expect(omit(obj, 'riba')).toEqual({foo: 'foo'});
   });
+
+  it('should return initial object if fields did not pass', () => {
+    const obj = {foo: 'foo'};
+
+    expect(omit(obj)).toEqual({foo: 'foo'});
+  });
 });
