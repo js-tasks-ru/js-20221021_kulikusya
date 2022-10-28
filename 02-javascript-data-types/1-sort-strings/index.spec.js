@@ -58,4 +58,10 @@ describe('javascript-data-types/sort-strings', () => {
     expect(sortStrings(data, 'asc')).toEqual(expectedAsc);
     expect(sortStrings(data, 'desc')).toEqual(expectedDesc);
   });
+
+  it('should returns exception if passed incorrect param', () => {
+    expect( () => {
+      sortStrings(['абрикос', 'яблоко', 'ёжик'], 'asc1');
+    }).toThrow();
+  });
 });
