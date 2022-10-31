@@ -6,7 +6,7 @@
  */
 export function sortStrings(arr, param = 'asc') {
     const directions = {asc: 1, desc: -1};
-    if (!(directions.hasOwnProperty(param))) {
+    if (!(Object.hasOwn(directions, param))) {
         throw new Error(`Unknown parameter 'param': '${param}' !`);
     }
 
