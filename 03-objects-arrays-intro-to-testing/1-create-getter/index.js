@@ -5,10 +5,9 @@
  */
 export function createGetter(path) {
 
-    return function(obj) {
+    const pathArr = path.split('.');
 
-        const pathArr = path.split('.');
-                
+    return function(obj) {
         let tmpResult = obj;
         for (const pathStep of pathArr) {
             if (!Object.hasOwn(tmpResult, pathStep)) {
