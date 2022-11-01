@@ -22,4 +22,19 @@ describe('objects-arrays-intro-to-testing/invert-object', () => {
   it('should return "undefined" if object wasn\'t passed', () => {
     expect(invertObj()).toBeUndefined();
   });
+
+  describe('my additional checks :)', () => {
+    
+    test.each`
+      type         | value
+      ${'null'}    | ${null}
+      ${'number'}  | ${1}
+      ${'string'}  | ${'str1'}
+      ${'boolean'} | ${true}
+      ${'symbol'}  | ${Symbol("test")}
+    `('should return "undefined" if passed ("$type": $value) instead of object', ({type, value}) => {
+      expect(invertObj(value)).toBeUndefined();
+    });   
+
+  });
 });
