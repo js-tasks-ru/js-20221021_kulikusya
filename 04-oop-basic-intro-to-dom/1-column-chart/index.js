@@ -88,12 +88,13 @@ export default class ColumnChart {
 
         return this.getColumnProps(this.getChartData().data)
             .map(({percent, value}) => `<div style="--value: ${value}" data-tooltip="${percent}"></div>`)
-            .reduce((result, div) => result += div);
+            // .reduce((result, div) => result += div);
+            .join("");
     }
 
     getColumnProps(data) {
         const maxValue = Math.max(...data);
-        const scale = 50 / maxValue;
+        const scale = this.chartHeight / maxValue;
       
         return data.map(item => {
             return {
