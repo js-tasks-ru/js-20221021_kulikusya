@@ -88,7 +88,6 @@ export default class ColumnChart {
 
         return this.getColumnProps(this.getChartData().data)
             .map(({percent, value}) => `<div style="--value: ${value}" data-tooltip="${percent}"></div>`)
-            // .reduce((result, div) => result += div);
             .join("");
     }
 
