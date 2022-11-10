@@ -19,62 +19,13 @@ export default class SortableTable {
 
   render() {
     const tableWrapper = document.createElement('div');
-    tableWrapper.innerHTML = this.getTableTemplate();
+    tableWrapper.innerHTML = SortableTable.getTableTemplate(this.getHeaders(), this.getData());
 
     this.element = tableWrapper.firstElementChild;
 
     this.subElements = this.findSubElements();
   }
  
-  getTableTemplate() {
-    return `
-      <div class="sortable-table">
-        ${this.getHeadersTemplate()}
-        ${this.getBodyTemplate()}
-      </div>
-    `;
-  }
-
-  getHeadersTemplate() {
-    return `
-      <div data-element="header" class="sortable-table__header sortable-table__row">
-        ${this.getHeaderCellsTemplate()}
-      </div>
-    `;
-  }
-  getHeaderCellsTemplate() {
-    return this.getHeaders().map(header => this.getHeaderCellTemplate(header)).join('');
-  }
-  getHeaderCellTemplate({id = '', title = '', sortable = false} = {}) {
-    return `
-      <div class="sortable-table__cell" data-id="${id}" data-sortable="${sortable}">
-        <span>${title}</span>
-      </div>
-    `;
-  }
-
-  getBodyTemplate() {
-    return `
-      <div data-element="body" class="sortable-table__body">
-        ${this.getRowsTemplate()}
-      </div>
-    `;
-  }
-  getRowsTemplate() {
-    return this.getData().map(data => this.getRowTemplate(data)).join('');
-  }
-  
-  getRowTemplate(data = {}) {
-    return `
-      <a href="/products/${data.id}" class="sortable-table__row">
-        ${this.getHeaders().map(header => header.template(data[header.id])).join('')}
-      </a>
-    `;
-  }
-  static getBodyCellTemplate(value = '') {
-    return `<div class="sortable-table__cell">${value}</div>`;
-  }
-
   sort(field = '', order = 'asc') {
     if (this.getSortedField().fieldName === field && this.getSortedField().order === order) {
       return;
@@ -106,7 +57,7 @@ export default class SortableTable {
     //update table
     this.subElements.header.querySelectorAll(`[data-order]`).forEach(fieldElement => fieldElement.removeAttribute('data-order'));
     this.subElements.header.querySelector(`[data-id="${this.getSortedField().fieldName}"]`).dataset.order = order;
-    this.subElements.body.innerHTML = this.getRowsTemplate();
+    this.subElements.body.innerHTML = SortableTable.getRowsTemplate(this.getHeaders(), this.getData());
   }
 
   findSubElements() {
@@ -144,6 +95,55 @@ export default class SortableTable {
   }
   getData() {
     return this._data;
+  }
+
+  //static
+  static getTableTemplate(headers = [], data = []) {
+    return `
+      <div class="sortable-table">
+        ${SortableTable.getHeadersTemplate(headers)}
+        ${SortableTable.getBodyTemplate(headers, data)}
+      </div>
+    `;
+  }
+
+  static getHeadersTemplate(headers = []) {
+    return `
+      <div data-element="header" class="sortable-table__header sortable-table__row">
+        ${SortableTable.getHeaderCellsTemplate(headers)}
+      </div>
+    `;
+  }
+  static getHeaderCellsTemplate(headers = []) {
+    return headers.map(header => SortableTable.getHeaderCellTemplate(header)).join('');
+  }
+  static getHeaderCellTemplate({id = '', title = '', sortable = false} = {}) {
+    return `
+      <div class="sortable-table__cell" data-id="${id}" data-sortable="${sortable}">
+        <span>${title}</span>
+      </div>
+    `;
+  }
+
+  static getBodyTemplate(headers = [], data = []) {
+    return `
+      <div data-element="body" class="sortable-table__body">
+        ${SortableTable.getRowsTemplate(headers, data)}
+      </div>
+    `;
+  }
+  static getRowsTemplate(headers = [], data = []) {
+    return data.map(data => SortableTable.getRowTemplate(headers, data)).join('');
+  }
+  static getRowTemplate(headers = [], data = {}) {
+    return `
+      <a href="/products/${data.id}" class="sortable-table__row">
+        ${headers.map(header => header.template(data[header.id])).join('')}
+      </a>
+    `;
+  }
+  static getBodyCellTemplate(value = '') {
+    return `<div class="sortable-table__cell">${value}</div>`;
   }
 
 }
