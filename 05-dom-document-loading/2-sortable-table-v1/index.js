@@ -1,12 +1,15 @@
 export default class SortableTable {
+  element;
+  subElements;
 
   _sortedField = {
     fieldName: '',
     order: '',
-  }
+  };
 
   constructor(headerConfig = [], data = []) {
     this._headers = headerConfig.map((header) => new Header(header));
+
     this._headersMap = new Map(this._headers.map(header => [header.id, header]));
     this._headerIds = [...this._headersMap.keys()];
     
@@ -74,6 +77,8 @@ export default class SortableTable {
   destroy() {
     this.remove();
     this.element = null;
+    this.subElements = null;
+    this.setSortedField();
   }
 
   // Get/Set
@@ -147,7 +152,6 @@ export default class SortableTable {
   }
 
 }
-
 
 class Header {
   constructor({id = '', title = '', sortable = false, sortType = 'string', template = SortableTable.getBodyCellTemplate} = {}) {
