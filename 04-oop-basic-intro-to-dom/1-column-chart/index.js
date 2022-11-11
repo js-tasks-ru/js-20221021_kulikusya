@@ -2,91 +2,90 @@ export default class ColumnChart {
 
     _chartHeight = 50;
 
-    constructor(chartData) {
-        this._chartData = chartData;
+    constructor({ data = [], label = '', link = '', value = 0, formatHeading = data => data } = {}) {
+        this._data = data;
+        this._label = label;
+        this._link = link;
+        this._value = value;
+        this.formatHeading = formatHeading;
         this.render();
     }
 
     render() {
         const element = document.createElement('div');
-        element.innerHTML = this.getChartData() ? this.getTemplate() : this.getLoadingFillerTemplate();
+        element.innerHTML = this.getTemplate();
         this.element = element.firstElementChild;
+
+        if (this.getData().length) {
+            this.element.classList.remove('column-chart_loading');
+        }
+
+        this.updatedElements = this.getUpdatedElements();
     }
 
     update(data = []) {
-        this.getChartData().data = data;
-        this.render();
+        this.setData(data);
+        this.updatedElements.body.innerHTML = this.getChart();
     }
 
     remove() {
         this.element.remove();
     }
 
-    destroy(){
+    destroy() {
         this.remove();
-    }
-
-
-
-    getLoadingFillerTemplate() {
-        return '<div class="column-chart_loading"></div>'
     }
 
     getTemplate() {
         return `
-        <div class="dashboard__chart_${this.getChartData().label}">
-            <div class="${this.generateColumnChartClass()}" style="--chart-height: ${this.chartHeight}">
+            <div class="column-chart column-chart_loading" style="--chart-height: ${this.chartHeight}">
                 <div class="column-chart__title">
-                    ${this.generateTitle()}
+                    Total ${this.getLabel()}
                     ${this.generateLink()}
                 </div>
                 <div class="column-chart__container">
-                    ${this.generateValue()}
-                    <div data-element="body" class="column-chart__chart">
-                        ${this.getChart()}
-                    </div>
+                    <div data-element="header" class="column-chart__header">${this.formatHeading(this.getValue())}</div>
+                    <div data-element="body" class="column-chart__chart">${this.getChart()}</div>
                 </div>
             </div>
-        </div>`
+        `;
+    }
+
+    getUpdatedElements() {
+        const elements = [...this.element.querySelectorAll('[data-element]')];
+        return Object.fromEntries(elements.map((updatedElement) => [updatedElement.dataset.element, updatedElement]));
     }
 
     get chartHeight() {
         return this._chartHeight;
     }
 
-    getChartData() {
-        return this._chartData;
+    getData() {
+        return this._data;
+    }
+    setData(data = []) {
+        this._data = data;
+    }
+    getLabel() {
+        return this._label;
+    }
+    getLink() {
+        return this._link;
+    }
+    getValue() {
+        return this._value;
     }
 
-    generateColumnChartClass() {
-        const {data = []} = this.getChartData();
-        return `column-chart${data.length === 0 ? ' column-chart_loading' : ''}`
-    }
-
-    generateTitle() {
-        if (!this.getChartData().label) return '';
-        return `Total ${this.getChartData().label}`;
-    }
     generateLink() {
-        if (!this.getChartData().link) return '';
-        return `<a href="/${this.getChartData().link}" class="column-chart__link">View all</a>`;
-    }
-    generateValue() {
-        if (!this.getChartData().value) return '';
-        return `<div data-element="header" class="column-chart__header">${this.getFormatValue()}</div>`
-    }
-
-    getFormatValue() {
-        return (this.getChartData().formatHeading) 
-            ? this.getChartData().formatHeading(this.getChartData().value) 
-            : this.getChartData().value;
+        return (this.getLink()) 
+            ? `<a href="/${this.getLink()}" class="column-chart__link">View all</a>`
+            : '';
     }
 
     getChart() {
-        const {data = []} = this.getChartData();
-        if (data.length === 0) return '';
+        if (!this.getData().length) return '';
 
-        return this.getColumnProps(this.getChartData().data)
+        return this.getColumnProps(this.getData())
             .map(({percent, value}) => `<div style="--value: ${value}" data-tooltip="${percent}"></div>`)
             .join("");
     }

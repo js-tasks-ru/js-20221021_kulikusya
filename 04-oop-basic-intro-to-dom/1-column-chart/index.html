@@ -11,6 +11,8 @@
       <div id="orders" class="dashboard__chart_orders"></div>
       <div id="sales" class="dashboard__chart_sales"></div>
       <div id="customers" class="dashboard__chart_customers"></div>
+      <br>
+      <div id="test" class="dashboard__chart_test"></div>
     </div>
 
     <script type="module">
@@ -40,9 +42,14 @@
         value: 321
       });
 
+      const testChart = new ColumnChart();
+
+
       orders.append(ordersChart.element);
       sales.append(salesChart.element);
       customers.append(customersChart.element);
+      
+      test.append(testChart.element);
     </script>
   </body>
 </html>
