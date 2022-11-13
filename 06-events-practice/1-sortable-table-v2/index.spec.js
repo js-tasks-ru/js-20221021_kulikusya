@@ -5,31 +5,36 @@ const data = [
     'id': 'soska-(pustyshka)-nuk-10729357',
     'title': 'Соска (пустышка) NUK 10729357',
     'price': 3,
-    'sales': 14
+    'sales': 14,
+    'status': 'завершен',
   },
   {
     'id': 'tv-tyuner-d-color--dc1301hd',
     'title': 'ТВ тюнер D-COLOR  DC1301HD',
     'price': 15,
-    'sales': 13
+    'sales': 13,
+    'status': 'новый',
   },
   {
     'id': 'detskiy-velosiped-lexus-trike-racer-trike',
     'title': 'Детский велосипед Lexus Trike Racer Trike',
     'price': 53,
-    'sales': 11
+    'sales': 11,
+    'status': 'завершен',
   },
   {
     'id': 'soska-(pustyshka)-philips-scf182/12',
     'title': 'Соска (пустышка) Philips SCF182/12',
     'price': 9,
-    'sales': 11
+    'sales': 11,
+    'status': 'новый',
   },
   {
     'id': 'powerbank-akkumulyator-hiper-sp20000',
     'title': 'Powerbank аккумулятор Hiper SP20000',
     'price': 30,
-    'sales': 11
+    'sales': 11,
+    'status': 'завершен',
   },
 ];
 
@@ -52,6 +57,12 @@ export const headerConfig = [
     sortable: true,
     sortType: 'number'
   },
+  {
+    id: 'status',
+    title: 'Status',
+    sortable: true,
+    sortType: 'status'
+  },
 ];
 
 describe('events-practice/sortable-table-v2', () => {
@@ -64,7 +75,23 @@ describe('events-practice/sortable-table-v2', () => {
         id: headerConfig.find(item => item.sortable).id,
         order: 'asc'
       }
-    });
+    },
+    [
+      {
+        type: 'status',
+        compareFunction: (astatusA, statusB) => {
+          function getStatusIndex(status = '') {
+            switch (status) {
+              case 'новый': return 1;
+              case 'завершен': return 2;
+              default: return 0;
+            }
+          }
+          return getStatusIndex(astatusA) - getStatusIndex(statusB);
+        }
+      }
+
+    ]);
 
     document.body.append(sortableTable.element);
   });
@@ -122,6 +149,25 @@ describe('events-practice/sortable-table-v2', () => {
     expect(firstRow).toHaveTextContent('53');
     expect(lastRow).toHaveTextContent('3');
   });
+
+  it('should sort "desc" correctly for additional "sortType" status', () => {
+    const { children } = sortableTable.subElements.header;
+    const [,,, status] = children;
+
+    const pointerdown = new MouseEvent('pointerdown', {
+      bubbles: true
+    });
+
+    status.dispatchEvent(pointerdown);
+
+    const { body } = sortableTable.subElements;
+    const firstRow = body.firstElementChild;
+    const lastRow = body.lastElementChild;
+
+    expect(firstRow).toHaveTextContent('завершен');
+    expect(lastRow).toHaveTextContent('новый');
+  });
+
 
   it('should move arrow icon to the corresponding column after sorting', () => {
     const { children } = sortableTable.subElements.header;
