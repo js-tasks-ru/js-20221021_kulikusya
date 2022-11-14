@@ -42,11 +42,17 @@
       sortable: true,
       sortType: 'number'
     },
+    // {
+    //   id: 'sales',
+    //   title: 'Sales',
+    //   sortable: true,
+    //   sortType: 'number'
+    // },
     {
-      id: 'sales',
-      title: 'Sales',
+      id: 'status',
+      title: 'Status',
       sortable: true,
-      sortType: 'number'
+      sortType: 'status'
     },
   ];
 
@@ -55,9 +61,16 @@
     sorted: {
       id: headerConfig.find(item => item.sortable).id,
       order: 'asc'
-    }
-  });
+    }},
+    [
+      {
+        type: 'status',
+        compareFunction: (a, b) => { return b - a; },
+      },
+    ]
+  );
 
   root.append(sortableTable.element);
+
 </script>
 </body>
