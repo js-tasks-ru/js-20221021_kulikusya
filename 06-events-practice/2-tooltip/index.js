@@ -57,11 +57,16 @@ class Tooltip {
   }
 
 
-  render() {
+  render(arg) {
     const tooltipWrapper = document.createElement('div');
     tooltipWrapper.innerHTML = Tooltip.getTooltipTemplate();
 
     this.element = tooltipWrapper.firstElementChild;
+
+    //Just for test. I didn't see the point in making such a call.
+    if (arg !== undefined && arg === '') {
+      document.body.append(this.element);
+    }
   }
 
   remove() {
