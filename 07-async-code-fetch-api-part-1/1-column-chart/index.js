@@ -78,8 +78,8 @@ export default class ColumnChart {
 
     destroy() {
         this.remove();
-        // this.element = {};
-        // this.updatedElements = {};
+        this.element = {};
+        this.updatedElements = {};
     }
 
     getTemplate() {
@@ -87,7 +87,7 @@ export default class ColumnChart {
             <div class="column-chart column-chart_loading" style="--chart-height: ${this.chartHeight}">
                 <div class="column-chart__title">
                     Total ${this.label}
-                    ${this.generateLink()}
+                    ${this.getLink()}
                 </div>
                 <div class="column-chart__container">
                     <div data-element="header" class="column-chart__header">${this.formatHeading(this.value)}</div>
@@ -106,7 +106,7 @@ export default class ColumnChart {
         return this._chartHeight;
     }
 
-    generateLink() {
+    getLink() {
         return (this.link) 
             ? `<a href="/${this.link}" class="column-chart__link">View all</a>`
             : '';
