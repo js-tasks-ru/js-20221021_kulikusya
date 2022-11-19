@@ -78,8 +78,8 @@ export default class ColumnChart {
 
     destroy() {
         this.remove();
-        this.element = {};
-        this.updatedElements = {};
+        // this.element = {};
+        // this.updatedElements = {};
     }
 
     getTemplate() {
