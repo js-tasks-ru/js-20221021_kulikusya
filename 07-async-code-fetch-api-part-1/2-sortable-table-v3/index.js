@@ -4,6 +4,8 @@ const BACKEND_URL = 'https://course-js.javascript.ru';
 
 export default class SortableTable {
 
+  _maxDataLoad = 30;
+
   _comparisons = {
     string: (s1, s2) => String(s1).localeCompare(String(s2), ['ru', 'en'], {caseFirst: 'upper'}),
     number: (n1, n2) => Number(n1) - Number(n2),
@@ -118,6 +120,9 @@ export default class SortableTable {
     const url = new URL(this.url, BACKEND_URL);
     url.searchParams.append("_sort", id);
     url.searchParams.append("_order", order);
+
+    url.searchParams.append('_start', 0);
+    url.searchParams.append('_end', 30);
 
     return this.loadData(url);
   }
