@@ -82,7 +82,6 @@ export default class SortableTable {
 
   sort = (id, order, isSortLocally = this.isSortLocally) => {
     this.sorted = {id, order};
-
     this.updateTableHeaderWithSort();
 
     let sortResult;
@@ -94,11 +93,20 @@ export default class SortableTable {
 
     return sortResult
     .then( () => {
-      this.subElements.body.innerHTML = this.getBodyRowsTemplate(this.headers, this.data);
-      this.element.classList.remove("sortable-table_loading");
+      this.updateTable();      
       return this.element;
     })
   }
+
+  updateTable() {
+    this.element.classList.remove("sortable-table_loading");
+    if (this.data.length) {
+      this.subElements.body.innerHTML = this.getBodyRowsTemplate(this.headers, this.data);
+    } else {
+      this.element.classList.add("sortable-table_empty");
+    }
+  }
+
 
   sortOnClient = (id, order) => {
     return new Promise((resolve, reject) => {
