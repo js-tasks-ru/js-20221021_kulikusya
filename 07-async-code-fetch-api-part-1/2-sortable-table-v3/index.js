@@ -8,20 +8,6 @@ export default class SortableTable {
     string: (s1, s2) => String(s1).localeCompare(String(s2), ['ru', 'en'], {caseFirst: 'upper'}),
     number: (n1, n2) => Number(n1) - Number(n2),
   };
-  getAllComparisons() {
-    return this._comparisons;
-  }
-  getCompare(type = 'string') {
-    return this.getAllComparisons()[type];
-  }
-  setNewCompare({type, compareFunction} = {}) {
-    if (!type || !compareFunction) {
-      console.error("Type or compare function are not defined");
-      return;
-    }
-    this.getAllComparisons()[type] = compareFunction;
-  }
-
 
   element;
 
@@ -30,11 +16,13 @@ export default class SortableTable {
   headerIds;
 
   url;
+  isSortLocally;
   sorted;
 
   constructor(headersConfig, 
     {
       url = '',
+      isSortLocally = false,
       sorted = {
         id: headersConfig.find(item => item.sortable).id,
         order: 'asc'
@@ -47,16 +35,12 @@ export default class SortableTable {
     this.headerIds = [...this.headersMap.keys()];
 
     this.url = url;
+    this.isSortLocally = isSortLocally;
     this.sorted = sorted;
 
     comparisons.forEach(compare => this.setNewCompare(compare));
 
     this.render();
-
-    //this.loadData();
-    this.sortOnServer(sorted.id, sorted.order);
-    this.updateTableHeaderWithSort();
-
   }
 
   render() {
@@ -67,9 +51,10 @@ export default class SortableTable {
     
     this.subElements = this.getSubElements(this.element);
 
-    this.updateTableHeaderWithSort();
+    this.subElements.header.addEventListener('pointerdown', this.headerOnClick);
 
-    this.subElements.header.addEventListener('pointerdown', this.headerClickEvent.bind(this));
+    this.updateTableHeaderWithSort();
+    return this.sort(this.sorted.id, this.sorted.order, false);
   }
 
   getSubElements(tableElement) {
@@ -79,38 +64,56 @@ export default class SortableTable {
     );
   }
 
-  headerClickEvent(event) {
-    const headerCell = event.target.closest('.sortable-table__cell');
+  headerOnClick = (event) => {
+    const column = event.target.closest('[data-sortable="true"]');
 
     //check element
-    if (!headerCell || !this.subElements.header.contains(headerCell)) {
+    if (!column || !this.subElements.header.contains(column)) {
       return;
     }
 
-    //check that field is sortable
-    if (headerCell.dataset.sortable !== 'true') {
-      return;
+    const toggleOrder = (order = 'asc') => {
+      return {asc: 'desc', desc: 'asc'}[order];
     }
 
-    //get field and order
-    const field = headerCell.dataset.id;
-    const currentFieldSorting = headerCell.dataset.order;
-    const order = (!currentFieldSorting || (currentFieldSorting === 'asc')) ? 'desc' : 'asc';
-
-    this.sortOnClient(field, order);
+    this.sort(column.dataset.id, toggleOrder(column.dataset.order));
   }
 
-  sortOnClient (id, order) {
-    if (this.sorted.id === id && this.sorted.order === order) {
-      return;
-    }
 
-    this.sortData(id, order);
+  sort = (id, order, isSortLocally = this.isSortLocally) => {
+    this.sorted = {id, order};
 
     this.updateTableHeaderWithSort();
-    
-    this.subElements.body.innerHTML = this.getBodyRowsTemplate(this.headers, this.data);
+
+    let sortResult;
+    if (isSortLocally) {
+      sortResult = this.sortOnClient(id, order);
+    } else {
+      sortResult = this.sortOnServer(id, order);
+    }
+
+    return sortResult
+    .then( () => {
+      this.subElements.body.innerHTML = this.getBodyRowsTemplate(this.headers, this.data);
+      this.element.classList.remove("sortable-table_loading");
+      return this.element;
+    })
   }
+
+  sortOnClient = (id, order) => {
+    return new Promise((resolve, reject) => {
+      this.sortData(id, order);
+      resolve();
+    })
+  }
+  sortOnServer = (id, order) => {
+    const url = new URL(this.url, BACKEND_URL);
+    url.searchParams.append("_sort", id);
+    url.searchParams.append("_order", order);
+
+    return this.loadData(url);
+  }
+  
   sortData(id = '', order = '') {
     const sortDirections = {asc: 1, desc: -1};
     if (!Object.hasOwn(sortDirections, order)) {
@@ -131,21 +134,12 @@ export default class SortableTable {
   }
 
 //?from=2022-10-20T13%3A54%3A23.938Z&to=2022-11-19T13%3A54%3A23.938Z&_sort=title&_order=asc&_start=0&_end=30
-  sortOnServer (id, order) {
-    const url = new URL(this.url, BACKEND_URL);
-    url.searchParams.append("_sort", id);
-    url.searchParams.append("_order", order);
-
-    return this.loadData(url);
-  }
+  
   loadData(url = '') {
-    // const url = new URL(this.url, BACKEND_URL);
     return fetchJson(url)
     .then((json => {
 
       this.data = json.map(item => Object.fromEntries(['id', ...this.headerIds].map(key => [key, item[key]])));
-      this.subElements.body.innerHTML = this.getBodyRowsTemplate(this.headers, this.data);
-      this.element.classList.remove("sortable-table_loading");
 
       return json;
     }));
@@ -255,5 +249,19 @@ export default class SortableTable {
 
   generateHeader = ({id = '', title = '', sortable = false, sortType = 'string', template = this.getBodyCellTemplate} = {}) => {
     return {id, title, sortable, sortType, template};
+  }
+
+  getAllComparisons() {
+    return this._comparisons;
+  }
+  getCompare(type = 'string') {
+    return this.getAllComparisons()[type];
+  }
+  setNewCompare({type, compareFunction} = {}) {
+    if (!type || !compareFunction) {
+      console.error("Type or compare function are not defined");
+      return;
+    }
+    this.getAllComparisons()[type] = compareFunction;
   }
 }
