@@ -146,6 +146,14 @@ describe('async-code-fetch-api-part-1/sortable-table-v3', () => {
     expect(spy.mock.calls[0][1]).toEqual('desc');
   });
 
+  it('should show empty placeholder if data is empty', async() => {
+    fetchMock.mockResponseOnce(JSON.stringify([]));
+
+    await sortableTable.render();
+
+    expect(sortableTable.element.className).toContain('sortable-table_empty');
+  });
+
   it('should have ability to be destroyed', () => {
     sortableTable.destroy();
 
