@@ -88,13 +88,17 @@ export default class ProductForm {
   getCategoryValues(category = {}) {
     const resultTitles = [];
     if (!Object.hasOwn(category, 'subcategories')) {
-      resultTitles.push(category.title);
+      resultTitles.push({id: category.id, title: category.title});
       return resultTitles;
     }
 
     category.subcategories.forEach(subCategory => {
-      this.getCategoryValues(subCategory).forEach(subCtegoryValue => {
-        resultTitles.push(`${category.title} &gt; ${subCtegoryValue}`);
+      this.getCategoryValues(subCategory).forEach(subCategoryValue => {
+        const categoryValue = {
+          id: subCategoryValue.id,
+          title: `${category.title} &gt; ${subCategoryValue.title}`
+        }
+        resultTitles.push(categoryValue);
       });
     });
 
@@ -113,6 +117,8 @@ export default class ProductForm {
     ].forEach(field => {
       form.elements[field].value = product[field];
     });
+
+    this.subElements.productForm.elements.subcategory.value = product.subcategory;
 
     this.subElements.imageListContainer.innerHTML = this.getImagesListTemplate(product.images);
     this.subElements.imageListContainer.addEventListener('pointerdown', this.deleteImage);
@@ -207,9 +213,9 @@ export default class ProductForm {
       </div>
     `;
   }
-  getCategoryOptionTemplate(category = '') {
+  getCategoryOptionTemplate(category = {id:'', title: ''}) {
     return `
-    <option value="ochki-virtualnoy-realnosti">${category}</option>
+    <option value="${category.id}">${category.title}</option>
     `
   }
 
